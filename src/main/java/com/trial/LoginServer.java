@@ -10,10 +10,10 @@ import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
-public class Server {
+public class LoginServer{
     private ServerSocket serverSocket;
     
-    Server(ServerSocket serverSocket){
+    LoginServer(ServerSocket serverSocket){
         this.serverSocket = serverSocket;
     }
 
@@ -21,7 +21,7 @@ public class Server {
         try{
             while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
-                System.out.println("New client connected!");
+                System.out.println("New Sign In!");
                 ClientHandler clienthandler = new ClientHandler(socket);
 
                 Thread thread = new Thread(clienthandler);

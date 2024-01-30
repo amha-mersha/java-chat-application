@@ -99,10 +99,7 @@ public class Client implements MessageCallback{
 
     // public static void main(String[] args) throws UnknownHostException, IOException {
 
-    //     Scanner scanner = new Scanner(System.in);
-    //     System.out.print("Enter your username for the group chat: ");
-    //     String username = scanner.nextLine();
-    //     Socket socket = new Socket("localhost", 1234);
-    //     Client client = new Client(socket, username,);
+    //     Socket socket = new Socket("192.168.122.39", 4321);
+    //     Client client = new Client(socket, "username",new ChatGUI("Username"));
     // }
 }

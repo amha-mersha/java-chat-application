@@ -84,7 +84,7 @@ public class SignIn extends JFrame {
                     // Successful login, perform actions here
                     try {
                         ChatGUI gui = new ChatGUI(enteredUsername);
-                        Client client = new Client(new Socket("0.0.0.0", 1234),enteredUsername,gui);
+                        Client client = new Client(new Socket("192.168.112.2", 4321),enteredUsername,gui);
                         client.listenForMessage();
                         JOptionPane.showMessageDialog(SignIn.this, "Login Successful");
                         dispose();

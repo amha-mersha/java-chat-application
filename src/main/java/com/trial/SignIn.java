@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -24,7 +26,7 @@ public class SignIn extends JFrame {
     JPasswordField passwordField;
     private Socket signSocket;
     private BufferedReader reader;
-    private PrintWriter writer;
+    private BufferedWriter writer;
 
 
     public SignIn(Socket signinSocket) {
@@ -38,7 +40,7 @@ public class SignIn extends JFrame {
 
         try {
             this.reader = new BufferedReader(new InputStreamReader(signSocket.getInputStream()));
-            this.writer = new PrintWriter(signSocket.getOutputStream(), true);
+            this.writer = new BufferedWriter(new OutputStreamWriter(signSocket.getOutputStream()));
         } catch (IOException e) {
             System.out.println("error creating reader and writer for sign in page");
             e.printStackTrace();
@@ -86,27 +88,19 @@ public class SignIn extends JFrame {
                 String enteredUsername = userName.getText();
                 String enteredPassword = new String(passwordField.getPassword());
 
-                
-
                 try {
-                    // Send credentials to the server
-                    writer.println(enteredUsername);
-                    writer.println(enteredPassword);
-
-                    // Receive response from the server
-                    String response = reader.readLine();
-
+                    String response = toServerConnector("NULL",enteredUsername, enteredPassword);
                     // Handle different responses
-                    if ("Successfully Logined".equals(response)) {
+                    if ("SUCCESS".equals(response)) {
                         // Successful login, perform actions here
                         ChatGUI gui = new ChatGUI(enteredUsername);
                         Client client = new Client(new Socket("0.0.0.0", 4321), enteredUsername, gui);
                         client.listenForMessage();
                         JOptionPane.showMessageDialog(SignIn.this, "Login Successful");
                         dispose();
-                    } else if ("Wrong Credintials".equals(response)) {
+                    } else if ("FAILURE".equals(response) || "DOESN'T EXIST".equals(response)) {
                         JOptionPane.showMessageDialog(SignIn.this, "Wrong Credentials");
-                    } else if ("Empty Credintials".equals(response)) {
+                    } else if ("EMPTY".equals(response)) {
                         JOptionPane.showMessageDialog(SignIn.this, "Username or password is empty");
                     }
                 }catch (IOException ex) {
@@ -137,7 +131,24 @@ public class SignIn extends JFrame {
         setVisible(true);
     }
 
-    public void closeEverthing(Socket socket, BufferedReader bufferedReader, PrintWriter printWriter){
+    public String toServerConnector(String register, String name, String password) throws IOException{
+        // Send credentials to the server
+        writer.write(register);
+        writer.newLine();
+        writer.flush();
+        writer.write(name);
+        writer.newLine();
+        writer.flush();
+        writer.write(password);
+        writer.newLine();
+        writer.flush();
+
+        // Receive response from the server
+        return reader.readLine();
+
+    }
+
+    public void closeEverthing(Socket socket, BufferedReader bufferedReader, BufferedWriter printWriter){
         try {
             if (socket != null){
                 socket.close();

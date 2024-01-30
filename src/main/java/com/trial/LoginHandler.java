@@ -36,26 +36,41 @@ public class LoginHandler implements Runnable {
 
     @Override
     public void run() {
+        String register;
         String username;
         String password;
         
         while (clientSocket.isConnected()){
             try {
+                register = bufferedReader.readLine();
                 username = bufferedReader.readLine();
                 password = bufferedReader.readLine();
-
-                if (username.equals("") || password.equals("")){
-                    this.bufferedWriter.write("Empty Credintials");
-                    this.bufferedWriter.newLine();
-                    this.bufferedWriter.flush();
-                }else if (!authenticate(username, password)){
-                    this.bufferedWriter.write("Wrong Credintials");
-                    this.bufferedWriter.newLine();
-                    this.bufferedWriter.flush();
+                if (register.equals("NULL")){
+                    if (username.equals("") || password.equals("")){
+                        this.bufferedWriter.write("EMPTY");//change to all capital EMPTY #lastchanges
+                        this.bufferedWriter.newLine();
+                        this.bufferedWriter.flush();
+                    }else if (authenticate(username, password).equals("DOESN'T EXIST")){
+                        this.bufferedWriter.write("DOESN'T EXIST");
+                        this.bufferedWriter.newLine();
+                        this.bufferedWriter.flush();
+                    }else if (authenticate(username, password).equals("FAILURE") ){
+                        this.bufferedWriter.write("FAILURE");
+                        this.bufferedWriter.newLine();
+                        this.bufferedWriter.flush();
+                    }else{
+                        this.bufferedWriter.write("SUCCESS");
+                        this.bufferedWriter.newLine();
+                        this.bufferedWriter.flush();
+                    }
                 }else{
-                    this.bufferedWriter.write("Successfully Logined");
-                    this.bufferedWriter.newLine();
-                    this.bufferedWriter.flush();
+                    Document newUser = new Document("username",username)
+                                        .append("password", password);
+                userCollection.insertOne(newUser);
+                    bufferedWriter.write("DONE");
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+
                 }
 
             } catch (IOException e) {
@@ -66,9 +81,15 @@ public class LoginHandler implements Runnable {
         }   
         }
 
-    private boolean authenticate(String username, String password) {
+    private String authenticate(String username, String password) {
         Document result = userCollection.find(new Document("username", username)).first();
-        return result != null && result.getString("password").equals(password);
+        if (result == null){
+            return "DOESN'T EXIST";
+        }else if (result.getString("password").equals(password)){
+            return "SUCCESS";
+        }else{
+            return "FAILURE";
+        }
     }
 
     public void removeloginhandler(){

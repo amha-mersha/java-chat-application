@@ -7,6 +7,7 @@ import org.bson.Document;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -21,10 +22,6 @@ public class SignUp extends JFrame {
     private JButton signUpButton;
     private JTextField userName;
     private JPasswordField passwordField;
-
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    private MongoCollection users;
     
     
     SignUp(SignIn signIn){
@@ -34,10 +31,6 @@ public class SignUp extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setLayout(new FlowLayout(FlowLayout.CENTER));
-
-        mongoClient = MongoClients.create("mongodb://localhost:27017");
-        database = mongoClient.getDatabase("chatdb");
-        users = database.getCollection("users");
 
          // Welcome label panel
          JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -78,28 +71,22 @@ public class SignUp extends JFrame {
             public void actionPerformed(ActionEvent e) {
             String enteredUsername = userName.getText();
             String enteredPassword = new String(passwordField.getPassword());
-                if (users.find(new Document("username", enteredUsername.trim())).first() == null) {
-                    boolean condition = true;
-                    if (enteredPassword.trim().length() < 5 ){
-                        JOptionPane.showMessageDialog(SignUp.this, "Enter a valid password.");
-                        condition = false;
-                    }
-                    // The username is not taken, proceed with sign-up
-                    if (enteredUsername.trim().length() < 0){
-                        JOptionPane.showMessageDialog(SignUp.this, "Enter a valid username.");
-                        condition = false;
-                    }
-                    if (condition){
-                    users.insertOne(new Document("username", enteredUsername.trim()).append("password", enteredPassword));
-                    JOptionPane.showMessageDialog(SignUp.this, "You have signed up successfully, proceed to sign in.");
+            try {
+                String checked = signIn.toServerConnector("NULL",enteredUsername, enteredPassword);
+                if (checked.equals("DOESN'T EXIST")){
+                    signIn.toServerConnector("REGISTER", enteredUsername, enteredPassword);
+                    JOptionPane.showMessageDialog(SignUp.this, "Signed Up successfully. procced to login");
+                    dispose();
                     signIn.setVisible(true);
-                    dispose();  // Close the current SignUp frame
-                    }
-                } else {
-                    // The username is taken
-                    JOptionPane.showMessageDialog(SignUp.this, "That username is taken, please choose another one.");
+                }else if (checked.equals("EMPTY")){
+                    JOptionPane.showMessageDialog(SignUp.this, "Invalid input, enter a valid one.");
+                }else if (checked.equals("SUCCESS") || checked.equals("FAILURE")){
+                    JOptionPane.showMessageDialog(SignUp.this, "That username is already taken.");
                 }
-            
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
             }
         });
         back.addActionListener(new ActionListener(){
@@ -114,6 +101,4 @@ public class SignUp extends JFrame {
          buttonsPanel.add(back);
          this.add(buttonsPanel);
     }
-
-    
 }

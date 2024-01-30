@@ -10,7 +10,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
-public class Server {
+public class Server{
     private ServerSocket serverSocket;
     
     Server(ServerSocket serverSocket){

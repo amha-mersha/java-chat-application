@@ -3,16 +3,16 @@ package com.trial;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.*;
 import org.bson.Document;
-
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
 public class SignIn extends JFrame {
     JLabel welcomeLabel;
@@ -22,19 +22,28 @@ public class SignIn extends JFrame {
     CustomButton signUpButton;
     JTextField userName;
     JPasswordField passwordField;
+    private Socket signSocket;
+    private BufferedReader reader;
+    private PrintWriter writer;
 
-    private MongoClient mongoClient;
-    private MongoDatabase database;
-    private MongoCollection users;
-    
 
-    public SignIn() {
+    public SignIn(Socket signinSocket) {
+        this.signSocket = signinSocket;
         this.setTitle("Sign In");
         this.setSize(400, 500);
         this.setResizable(false);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        try {
+            this.reader = new BufferedReader(new InputStreamReader(signSocket.getInputStream()));
+            this.writer = new PrintWriter(signSocket.getOutputStream(), true);
+        } catch (IOException e) {
+            System.out.println("error creating reader and writer for sign in page");
+            e.printStackTrace();
+
+        }
 
         // Welcome label panel
         JPanel welcomePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -76,26 +85,36 @@ public class SignIn extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String enteredUsername = userName.getText();
                 String enteredPassword = new String(passwordField.getPassword());
-                String storedPassword = getPassword(enteredUsername);
 
-                if (storedPassword == null) {
-                    JOptionPane.showMessageDialog(SignIn.this, "The username doesn't exist");
-                } else if (storedPassword.equals(enteredPassword)) {
-                    // Successful login, perform actions here
-                    try {
+                
+
+                try {
+                    // Send credentials to the server
+                    writer.println(enteredUsername);
+                    writer.println(enteredPassword);
+
+                    // Receive response from the server
+                    String response = reader.readLine();
+
+                    // Handle different responses
+                    if ("Successfully Logined".equals(response)) {
+                        // Successful login, perform actions here
                         ChatGUI gui = new ChatGUI(enteredUsername);
-                        Client client = new Client(new Socket("192.168.112.2", 4321),enteredUsername,gui);
+                        Client client = new Client(new Socket("0.0.0.0", 4321), enteredUsername, gui);
                         client.listenForMessage();
                         JOptionPane.showMessageDialog(SignIn.this, "Login Successful");
                         dispose();
-                    } catch (IOException e1) {
-                        // TODO Auto-generated catch block
-                        JOptionPane.showMessageDialog(SignIn.this, "Couldn't connect to connect to server");
+                    } else if ("Wrong Credintials".equals(response)) {
+                        JOptionPane.showMessageDialog(SignIn.this, "Wrong Credentials");
+                    } else if ("Empty Credintials".equals(response)) {
+                        JOptionPane.showMessageDialog(SignIn.this, "Username or password is empty");
+                    }
+                }catch (IOException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(SignIn.this, "Couldn't connect to the server");
+                        closeEverthing(signinSocket, reader, writer);
                         dispose();
                     }
-                } else {
-                    JOptionPane.showMessageDialog(SignIn.this, "Incorrect password");
-                }
             }
         });
 
@@ -118,21 +137,26 @@ public class SignIn extends JFrame {
         setVisible(true);
     }
 
-
-    public String getPassword(String name) {
-        MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-        MongoDatabase database = mongoClient.getDatabase("chatdb");
-        MongoCollection collection = database.getCollection("users");
-
-        Document result = (Document) collection.find(new Document("username", name)).first();
-        if (result != null) {
-            return result.getString("password");
-        } else {
-            return null;
+    public void closeEverthing(Socket socket, BufferedReader bufferedReader, PrintWriter printWriter){
+        try {
+            if (socket != null){
+                socket.close();
+            }
+            if (bufferedReader != null){
+                bufferedReader.close();
+            }
+            if (printWriter != null){
+                printWriter.close();
+            }
+        } catch (Exception e) {
+            System.out.println("error at close everything");
+            e.printStackTrace();
         }
     }
-    public static void main(String[] args) {
-        SignIn signIn = new SignIn();
+
+
+    public static void main(String[] args) throws UnknownHostException, IOException {
+        SignIn signIn = new SignIn( new Socket("0.0.0.0",5678));
     }
 
 }

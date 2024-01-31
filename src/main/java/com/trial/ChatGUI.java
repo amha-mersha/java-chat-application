@@ -118,10 +118,15 @@ public class ChatGUI {
 
           disconnectButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
+                messageCallback.onDisconnect();
                 // Disable discussion field, users list, and text area
                 discussionField.setEnabled(false);
                 listUsers.setEnabled(false);
                 textArea.setEnabled(false);
+
+                discussionField.setBackground(Color.LIGHT_GRAY);
+                listUsers.setBackground(Color.LIGHT_GRAY);
+                textArea.setBackground(Color.LIGHT_GRAY);
         
                 // Replace disconnect button with join back button
                 buttons.remove(disconnectButton);
@@ -132,13 +137,28 @@ public class ChatGUI {
                 buttons.repaint();
         
                 // Inform the callback about the disconnect
-                messageCallback.onDisconnect();
             }
         });
         
         joinButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                messageCallback.onReconnect();
+              messageCallback.onReconnect();
+              // Enable discussion field, users list, and text area
+              discussionField.setEnabled(true);
+              listUsers.setEnabled(true);
+              textArea.setEnabled(true);
+
+              discussionField.setBackground(Color.WHITE);
+              listUsers.setBackground(Color.WHITE);
+              textArea.setBackground(Color.WHITE);
+
+              // Replace join back button with disconnect button
+              buttons.remove(joinButton);
+              buttons.add(disconnectButton);
+
+              // Repaint the panel to reflect changes
+              buttons.revalidate();
+              buttons.repaint();
             }
         });        
 
@@ -178,20 +198,7 @@ public class ChatGUI {
     
   }
 
-  public void reconnect(){
-    // Enable discussion field, users list, and text area
-    discussionField.setEnabled(true);
-    listUsers.setEnabled(true);
-    textArea.setEnabled(true);
 
-    // Replace join back button with disconnect button
-    buttons.remove(this.joinButton);
-    buttons.add(disconnectButton);
-
-    // Repaint the panel to reflect changes
-    buttons.revalidate();
-    buttons.repaint();
-  }
   
   public void setMessageCallback(MessageCallback callback){
     messageCallback = callback;

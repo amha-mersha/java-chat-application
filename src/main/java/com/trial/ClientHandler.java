@@ -40,7 +40,7 @@ public class ClientHandler implements Runnable{
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.clientUsername = bufferedReader.readLine();//this would be accepted from the user as they sign in  
             clientHandlers.add(this);
-            broadcastMessage("SERVER: " +this.clientUsername+ " has entered the chat!");
+            broadcastMessage("<b>SERVER: </b>" +this.clientUsername+ "<b> has entered the chat! </b>");
         }catch (IOException e){
             System.out.println("error at ClientHandler constructor");
             closeEverthing(socket, bufferedReader, bufferedWriter);

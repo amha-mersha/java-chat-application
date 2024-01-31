@@ -46,6 +46,29 @@ public class Client implements MessageCallback{
             closeEverthing(socket, bufferedReader, bufferedWriter);
         }
     }
+    
+    public void sendMessage(boolean joined){
+        // i think this part would be changed to impliment GUI
+        if (joined){
+            try {
+                bufferedWriter.write(  "<b> SERVER: </b>"+username +"<b> has rejoined the chat.");
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,"error at send rejoin message, client " + e.getMessage());
+                closeEverthing(socket, bufferedReader, bufferedWriter);
+            }
+        }else{
+            try {
+                bufferedWriter.write(  "<b> SERVER: </b>"+username +"<b> has left the chat.");
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null,"error at send disconnect message, client " + e.getMessage());
+                closeEverthing(socket, bufferedReader, bufferedWriter);
+            }
+        }
+    }
 
     public void listenForMessage(){
         new Thread(new Runnable()
@@ -89,34 +112,12 @@ public class Client implements MessageCallback{
     }
     @Override
     public void onDisconnect() {
-        // The callback from the GUI for disconnection
-        try{
-            if (bufferedReader != null){
-                bufferedReader.close();
-            }
-            if (bufferedWriter != null){
-                bufferedWriter.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        sendMessage(false);
     }
 
     @Override
     public void onReconnect(){
-        try {
-            this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            bufferedWriter.write(username);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-
-            // Inform the GUI about the reconnection
-            gui.reconnect();
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "error at onReconnet " + e.getMessage());
-            closeEverthing(socket, bufferedReader, bufferedWriter);
-        }
+        sendMessage(true);
     }
 
 

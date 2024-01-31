@@ -3,27 +3,34 @@ package com.trial;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatMediatorImpl implements ChatMediator {
+import javax.swing.SwingUtilities;
+
+public class ChatMediatorImpl {
     private final List<String> userList = new ArrayList<>();
     private final List<ChatGUI> chatGUIs = new ArrayList<>();
 
-    @Override
     public void addUser(String username) {
         userList.add(username);
         notifyUserListUpdate();
     }
 
-    @Override
     public void removeUser(String username) {
         userList.remove(username);
         notifyUserListUpdate();
     }
 
-    @Override
     public ArrayList<String> getUserList() {
         return new ArrayList<>(userList);
     }
 
+    public ChatGUI getGUI(String usernameString){
+        for (ChatGUI gui : chatGUIs){
+            if (gui.getName().equals(usernameString)){
+                return gui;
+            }
+        }
+        return null;
+    }
     public void addChatGUI(ChatGUI chatGUI) {
         chatGUIs.add(chatGUI);
     }
@@ -33,9 +40,12 @@ public class ChatMediatorImpl implements ChatMediator {
     }
 
     public void notifyUserListUpdate() {
+    SwingUtilities.invokeLater(() -> {
         for (ChatGUI chatGUI : chatGUIs) {
             chatGUI.updateSharedUserList(this);
         }
-    }
+    });
+}
+
 }
     

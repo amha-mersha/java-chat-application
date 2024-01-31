@@ -20,14 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatGUI {
-    final JFrame mainFrame;
-    final JTextPane discussionField = new JTextPane();
-    final  JTextPane listUsers = new JTextPane();
-    final JTextField textArea = new JTextField();
+    JFrame mainFrame;
+    JTextPane discussionField = new JTextPane();
+    JTextPane listUsers = new JTextPane();
+    JTextField textArea = new JTextField();
     private JPanel buttons = new JPanel();
-    final JButton joinButton;
-    final JButton sendButton;
-    final JButton disconnectButton;
+    JButton joinButton;
+    JButton sendButton;
+    JButton disconnectButton;
     private String oldMsg = "";
     private MessageCallback messageCallback;    
     private String usernameString;
@@ -192,7 +192,8 @@ public class ChatGUI {
   }
 
   void appendToPane(JTextPane tp, String msg) {
-    Document doc = tp.getDocument();
+    SwingUtilities.invokeLater(() -> {
+      Document doc = tp.getDocument();
     if (doc instanceof HTMLDocument) {
         HTMLDocument htmlDoc = (HTMLDocument) doc;
         HTMLEditorKit editorKit = (HTMLEditorKit) tp.getEditorKit();
@@ -213,22 +214,28 @@ public class ChatGUI {
             e.printStackTrace();
         }
     }
+  });
 }
   
   public void setMessageCallback(MessageCallback callback){
     messageCallback = callback;
   }
-  void updateSharedUserList(ChatMediatorImpl mediatorImpl) {
+  public void updateSharedUserList(ChatMediatorImpl mediatorImpl) {
     SwingUtilities.invokeLater(() -> {
-        listUsers.setText("");
-        for (String user : mediatorImpl.getUserList()) {
-            appendToPane(listUsers, "@" + user);
-        }
-        listUsers.revalidate();
-        listUsers.repaint();
-        mainFrame.revalidate();
-        mainFrame.repaint();
-    });
+      listUsers.setText("");
+      for (String user : mediatorImpl.getUserList()) {
+          appendToPane(listUsers, "@" + user);
+      }
+      listUsers.revalidate();
+      listUsers.repaint();
+      mainFrame.revalidate();
+      mainFrame.repaint();
+  });
+  
+    
+}
+public String getName(){
+  return this.usernameString;
 }
 
 // private void removeUserFromSharedList(String username) {

@@ -94,7 +94,7 @@ public class SignIn extends JFrame {
                     if ("SUCCESS".equals(response)) {
                         // Successful login, perform actions here
                         ChatGUI gui = new ChatGUI(enteredUsername);
-                        Client client = new Client(new Socket("192.168.130.2", 8080), enteredUsername, gui);
+                        Client client = new Client(new Socket("localhost", 8080), enteredUsername, gui);
                         client.listenForMessage();
                         JOptionPane.showMessageDialog(SignIn.this, "Login Successful");
                         dispose();
@@ -167,7 +167,7 @@ public class SignIn extends JFrame {
 
 
     public static void main(String[] args) throws UnknownHostException, IOException {
-        SignIn signIn = new SignIn( new Socket("192.168.130.2",9090));
+        SignIn signIn = new SignIn( new Socket("localhost",9090));
     }
 
 }

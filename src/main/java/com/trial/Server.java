@@ -14,9 +14,9 @@ public class Server{
     private ServerSocket serverSocket;
     private ChatMediatorImpl mediator;
     
-    Server(ServerSocket serverSocket){
+    Server(ServerSocket serverSocket, ChatMediatorImpl mediatorImpl){
         this.serverSocket = serverSocket;
-        this.mediator = new ChatMediatorImpl() ;
+        this.mediator = mediatorImpl;
     }
 
     public void startServer(){
@@ -44,7 +44,8 @@ public class Server{
     }
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(8080);
-        Server server = new Server(serverSocket);
+        ChatMediatorImpl mediatorImpl = new ChatMediatorImpl();
+        Server server = new Server(serverSocket,mediatorImpl);
         System.out.println("Port 8080 is now open." + serverSocket.getInetAddress());
 
         server.startServer();

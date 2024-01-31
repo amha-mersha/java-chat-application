@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.swing.SwingUtilities;
 
@@ -57,6 +59,17 @@ public class ClientHandler implements Runnable{
     public void run(){
         //Everything in here is going to be run on a separate thread
         String messageFromClient;
+
+        ArrayList<Document> sortedMessages = (ArrayList<Document>) messageCollection.find().into(new ArrayList<>());
+        Collections.sort(sortedMessages, Comparator.comparingLong(doc -> doc.getLong("timestamp"))); // 1 for ascending, -1 for descending
+
+        ChatGUI thisGui = mediatorImpl.getGUI(clientUsername);
+        for (Document document : sortedMessages) {
+              String msg = document.getString("message");
+              SwingUtilities.invokeLater(() -> {
+                thisGui.appendToPane(thisGui.discussionField, msg);
+            });
+          }
 
         while (socket.isConnected()) {
             try{

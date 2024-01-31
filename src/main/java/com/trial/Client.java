@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import javax.swing.JOptionPane;
@@ -16,7 +17,8 @@ public class Client implements MessageCallback{
     BufferedReader bufferedReader;
     BufferedWriter bufferedWriter;
     String username;
-    private ChatGUI gui;
+    ChatGUI gui;
+    static ArrayList<String> users = new ArrayList<>();
 
     
     Client(Socket socket, String username, ChatGUI gui){
@@ -27,6 +29,7 @@ public class Client implements MessageCallback{
 
             this.socket = socket;
             this.username = username;
+            users.add(username);
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter = new BufferedWriter((new OutputStreamWriter(socket.getOutputStream())));
             bufferedWriter.write(username);
@@ -90,10 +93,6 @@ public class Client implements MessageCallback{
         }).start();
     }
 
-    public void addToPane(String messString){
-        gui.appendToPane(gui.discussionField, messString);
-    }
-
     public ChatGUI geChatGUI(){
         return this.gui;
     }
@@ -133,15 +132,4 @@ public class Client implements MessageCallback{
         return this.username;
     }
 
-    // public static void main(String[] args) {
-    //     try {
-    //         Client client = new Client(new Socket("192.168.130.2",8080), "amha", new ChatGUI("amha"));
-    //     } catch (UnknownHostException e) {
-    //         // TODO Auto-generated catch block
-    //         e.printStackTrace();
-    //     } catch (IOException e) {
-    //         // TODO Auto-generated catch block
-    //         e.printStackTrace();
-    //     }
-    // }
 }

@@ -5,24 +5,18 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class ChatGUI {
     JFrame mainFrame;
     JTextPane discussionField = new JTextPane();
-    JTextPane listUsers = new JTextPane();
     JTextField textArea = new JTextField();
     private JPanel buttons = new JPanel();
     JButton joinButton;
@@ -44,27 +38,15 @@ public class ChatGUI {
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Discussion thread module
-        discussionField.setBounds(25, 25, 490, 320);
+        discussionField.setBounds(15, 15, 660, 320);
         discussionField.setFont(font);
         discussionField.setMargin(new Insets(6, 6, 6, 6));
         discussionField.setEditable(false);
         JScrollPane discussionScroll = new JScrollPane(discussionField);
-        discussionScroll.setBounds(25, 25, 490, 320);
+        discussionScroll.setBounds(15, 15, 660, 320);
 
         discussionField.setContentType("text/html");
         discussionField.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
-
-        // Module of the user list
-        listUsers.setBounds(520, 25, 156, 320);
-        listUsers.setEditable(true);
-        listUsers.setFont(font);
-        listUsers.setMargin(new Insets(6, 6, 6, 6));
-        listUsers.setEditable(false);
-        JScrollPane listScroll = new JScrollPane(listUsers);
-        listScroll.setBounds(520, 25, 156, 320);
-
-        listUsers.setContentType("text/html");
-        listUsers.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true);
 
         // Field message user input
         textArea.setBounds(25, 350, 510, 50);
@@ -87,7 +69,7 @@ public class ChatGUI {
         joinButton.setFont(font);
         joinButton.setBounds(25, 410, 130, 35);
 
-        buttons.setBounds(550,350,120,100);
+        buttons.setBounds(550,350,120,90);
         buttons.setLayout(new GridLayout(2,1,3,4));
         buttons.add(sendButton);
         buttons.add(disconnectButton);
@@ -125,11 +107,9 @@ public class ChatGUI {
                 messageCallback.onDisconnect();
                 // Disable discussion field, users list, and text area
                 discussionField.setEnabled(false);
-                listUsers.setEnabled(false);
                 textArea.setEnabled(false);
 
                 discussionField.setBackground(Color.LIGHT_GRAY);
-                listUsers.setBackground(Color.LIGHT_GRAY);
                 textArea.setBackground(Color.LIGHT_GRAY);
         
                 // Replace disconnect button with join back button
@@ -149,11 +129,9 @@ public class ChatGUI {
               messageCallback.onReconnect();
               // Enable discussion field, users list, and text area
               discussionField.setEnabled(true);
-              listUsers.setEnabled(true);
               textArea.setEnabled(true);
 
               discussionField.setBackground(Color.WHITE);
-              listUsers.setBackground(Color.WHITE);
               textArea.setBackground(Color.WHITE);
 
               // Replace join back button with disconnect button
@@ -169,10 +147,8 @@ public class ChatGUI {
 
           Container board = mainFrame.getContentPane();
           board.add(discussionScroll, board);
-          board.add(listScroll,board );
           board.add(textScroll, board);
           board.add(buttons, board);
-          
 
           mainFrame.setVisible(true);
           setMessageCallback(messageCallback);
@@ -220,32 +196,14 @@ public class ChatGUI {
   public void setMessageCallback(MessageCallback callback){
     messageCallback = callback;
   }
-  public void updateSharedUserList(ChatMediatorImpl mediatorImpl) {
-    SwingUtilities.invokeLater(() -> {
-      listUsers.setText("");
-      for (String user : mediatorImpl.getUserList()) {
-          appendToPane(listUsers, "@" + user);
-      }
-      listUsers.revalidate();
-      listUsers.repaint();
-      mainFrame.revalidate();
-      mainFrame.repaint();
-  });
+
   
-    
-}
-public String getName(){
-  return this.usernameString;
-}
 
-// private void removeUserFromSharedList(String username) {
-//   SwingUtilities.invokeLater(() -> {
-//       mediator.removeUser(username);
-//       updateSharedUserList();
-//   });
-// }
-
+  public String getName(){
+    return this.usernameString;
+  }
   public static void main(String[] args) {
-    ChatGUI chatGUI = new ChatGUI("testcase");
+    ChatGUI chatGUI = new ChatGUI("null");
   }
 }
+

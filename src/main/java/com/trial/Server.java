@@ -4,19 +4,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.ConnectionString;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-
 public class Server{
     private ServerSocket serverSocket;
-    private ChatMediatorImpl mediator;
     
-    Server(ServerSocket serverSocket, ChatMediatorImpl mediatorImpl){
+    Server(ServerSocket serverSocket){
         this.serverSocket = serverSocket;
-        this.mediator = mediatorImpl;
     }
 
     public void startServer(){
@@ -24,7 +16,7 @@ public class Server{
             while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connected!");
-                ClientHandler clienthandler = new ClientHandler(socket,mediator);
+                ClientHandler clienthandler = new ClientHandler(socket);
 
                 Thread thread = new Thread(clienthandler);
                 thread.start();
@@ -44,8 +36,7 @@ public class Server{
     }
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(8080);
-        ChatMediatorImpl mediatorImpl = new ChatMediatorImpl();
-        Server server = new Server(serverSocket,mediatorImpl);
+        Server server = new Server(serverSocket);
         System.out.println("Port 8080 is now open." + serverSocket.getInetAddress());
 
         server.startServer();

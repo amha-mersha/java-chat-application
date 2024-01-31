@@ -16,7 +16,6 @@ import org.bson.Document;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-// import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
@@ -27,22 +26,17 @@ public class ClientHandler implements Runnable{
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String clientUsername;
-    // amha: database
     private MongoClient mongoClient;
     private MongoDatabase database;
     private MongoCollection messageCollection;
-    private ChatMediatorImpl mediatorImpl;
 
-    ClientHandler(Socket socket, ChatMediatorImpl mediatorImpl){
+    ClientHandler(Socket socket){
         try{
             this.mongoClient = MongoClients.create("mongodb://localhost:27017");
             this.database = mongoClient.getDatabase("chatdb");
             this.messageCollection = database.getCollection("messages");
 
             this.socket = socket;
-            this.mediatorImpl = mediatorImpl;
-            mediatorImpl.addUser(clientUsername);
-            mediatorImpl.notifyUserListUpdate();
             //socket.getInputStream gives us a byte stream so we wrapp it with InputStreamReader to character stream, the same with the output stream
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -74,16 +68,15 @@ public class ClientHandler implements Runnable{
                 System.out.println("error at retirving old messages, clienthandler");
                 e.getMessage();
             }
-          }
+        }
 
         while (socket.isConnected()) {
             try{
                 messageFromClient = bufferedReader.readLine();
                 if (messageFromClient.equals("SERVER:JOINED")){
-                    broadcastMessage("<b>SERVER: " + clientUsername + " has joined the chat.</b>");
-                    mediatorImpl.addUser(clientUsername);
+                    broadcastMessage("<b>SERVER: </b>" + clientUsername + "<b> has joined the chat.</b>");
                 }else if(messageFromClient.equals("SERVER:LEFT")){
-                    broadcastMessage("<b>SERVER: " + clientUsername + " has left the chat.</b>");
+                    broadcastMessage("<b>SERVER: </b>" + clientUsername + "<b> has left the chat.</b>");
                 }else{
                     //amha
                     // Store the message in MongoDB

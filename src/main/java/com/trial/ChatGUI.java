@@ -1,24 +1,28 @@
 package com.trial;
 
-import javax.swing.JButton;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
+import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChatGUI {
+    final JFrame mainFrame;
     final JTextPane discussionField = new JTextPane();
-    final JTextPane listUsers = new JTextPane();
+    final  JTextPane listUsers = new JTextPane();
     final JTextField textArea = new JTextField();
     private JPanel buttons = new JPanel();
     final JButton joinButton;
@@ -27,13 +31,16 @@ public class ChatGUI {
     private String oldMsg = "";
     private MessageCallback messageCallback;    
     private String usernameString;
+    private final ChatMediatorImpl mediator;
     
-    public ChatGUI(String usernameString){
+    public ChatGUI(String usernameString,ChatMediatorImpl mediator){
         String fontfamily = "Arial, sans-serif";
         Font font = new Font(fontfamily, Font.PLAIN, 15);
         this.usernameString = usernameString;
+        this.mediator = mediator;
+        mediator.addUser(usernameString);
 
-        final JFrame mainFrame = new JFrame("Chat");  
+        mainFrame = new JFrame("Chat");  
         mainFrame.getContentPane().setLayout(null);
         mainFrame.setSize(700, 500);
         mainFrame.setResizable(false);
@@ -119,6 +126,7 @@ public class ChatGUI {
           disconnectButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 messageCallback.onDisconnect();
+                mediator.removeChatGUI(ChatGUI.this);
                 // Disable discussion field, users list, and text area
                 discussionField.setEnabled(false);
                 listUsers.setEnabled(false);
@@ -143,6 +151,7 @@ public class ChatGUI {
         joinButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
               messageCallback.onReconnect();
+              mediator.addChatGUI(ChatGUI.this);
               // Enable discussion field, users list, and text area
               discussionField.setEnabled(true);
               listUsers.setEnabled(true);
@@ -168,6 +177,8 @@ public class ChatGUI {
           board.add(listScroll,board );
           board.add(textScroll, board);
           board.add(buttons, board);
+          
+
           mainFrame.setVisible(true);
           setMessageCallback(messageCallback);
     }
@@ -185,25 +196,55 @@ public class ChatGUI {
       appendToPane(discussionField, "<b> YOU </b>" + ": " +message);
   }
 
-  void appendToPane(JTextPane tp, String msg){
-    HTMLDocument doc = (HTMLDocument)tp.getDocument();
-    HTMLEditorKit editorKit = (HTMLEditorKit)tp.getEditorKit();
-    try {
-      editorKit.insertHTML(doc, doc.getLength(), msg, 0, 0, null);
-      tp.setCaretPosition(doc.getLength());
-    } catch(Exception e){
-      System.out.println("error at appendToPane");
-      e.printStackTrace();
+  void appendToPane(JTextPane tp, String msg) {
+    Document doc = tp.getDocument();
+    if (doc instanceof HTMLDocument) {
+        HTMLDocument htmlDoc = (HTMLDocument) doc;
+        HTMLEditorKit editorKit = (HTMLEditorKit) tp.getEditorKit();
+        try {
+            editorKit.insertHTML(htmlDoc, htmlDoc.getLength(), msg, 0, 0, null);
+            tp.setCaretPosition(htmlDoc.getLength());
+        } catch (Exception e) {
+            System.out.println("Error at appendToPane");
+            e.printStackTrace();
+        }
+    } else {
+        // Handle plain text
+        try {
+            doc.insertString(doc.getLength(), msg + "\n", null);
+            tp.setCaretPosition(doc.getLength());
+        } catch (BadLocationException e) {
+            System.out.println("Error at appendToPane");
+            e.printStackTrace();
+        }
     }
-    
-  }
+}
 
 
   
   public void setMessageCallback(MessageCallback callback){
     messageCallback = callback;
   }
+
+  void updateSharedUserList() {
+    SwingUtilities.invokeLater(() -> {
+        listUsers.setText("");
+        for (String user : mediator.getUserList()) {
+            appendToPane(listUsers, "@" + user);
+        }
+        listUsers.revalidate();
+        listUsers.repaint();
+    });
+}
+
+private void removeUserFromSharedList(String username) {
+  SwingUtilities.invokeLater(() -> {
+      mediator.removeUser(username);
+      updateSharedUserList();
+  });
+}
+
   public static void main(String[] args) {
-    ChatGUI chatGUI = new ChatGUI("testcase");
+    ChatGUI chatGUI = new ChatGUI("testcase", new ChatMediatorImpl());
   }
 }

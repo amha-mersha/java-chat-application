@@ -23,6 +23,7 @@ public class Client implements MessageCallback{
             this.gui = gui;
             // Set itself as a callback in the GUI
             gui.setMessageCallback(this);
+
             this.socket = socket;
             this.username = username;
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -121,9 +122,9 @@ public class Client implements MessageCallback{
     }
 
 
-    // public static void main(String[] args) throws UnknownHostException, IOException {
+    public static void main(String[] args) throws UnknownHostException, IOException {
 
-    //     Socket socket = new Socket("192.168.122.39", 4321);
-    //     Client client = new Client(socket, "username",new ChatGUI("Username"));
-    // }
+        Socket socket = new Socket("localhost", 4321);
+        Client client = new Client(socket, "username",new ChatGUI("Username"));
+    }
 }

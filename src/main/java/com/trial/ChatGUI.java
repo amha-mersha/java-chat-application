@@ -238,7 +238,7 @@ public class ChatGUI {
 //   });
 // }
 
-  // public static void main(String[] args) {
-  //   ChatGUI chatGUI = new ChatGUI("testcase", new ChatMediatorImpl());
-  // }
+  public static void main(String[] args) {
+    ChatGUI chatGUI = new ChatGUI("testcase");
+  }
 }

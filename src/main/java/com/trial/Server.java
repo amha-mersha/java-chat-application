@@ -43,9 +43,9 @@ public class Server{
         }
     }
     public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(4321);
+        ServerSocket serverSocket = new ServerSocket(8080);
         Server server = new Server(serverSocket);
-        System.out.println("Port 4321 is now open.");
+        System.out.println("Port 8080 is now open." + serverSocket.getInetAddress());
 
         server.startServer();
     }

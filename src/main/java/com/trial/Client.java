@@ -119,4 +119,16 @@ public class Client implements MessageCallback{
     public void onReconnect(){
         sendMessage(true);
     }
+
+    // public static void main(String[] args) {
+    //     try {
+    //         Client client = new Client(new Socket("192.168.130.2",8080), "amha", new ChatGUI("amha"));
+    //     } catch (UnknownHostException e) {
+    //         // TODO Auto-generated catch block
+    //         e.printStackTrace();
+    //     } catch (IOException e) {
+    //         // TODO Auto-generated catch block
+    //         e.printStackTrace();
+    //     }
+    // }
 }

@@ -43,7 +43,7 @@ public class LoginServer {
     }
 
     public static void main(String[] args) throws IOException {
-        LoginServer loginServer = new LoginServer(5678);
+        LoginServer loginServer = new LoginServer(9090);
         loginServer.startServer();
     }
 }

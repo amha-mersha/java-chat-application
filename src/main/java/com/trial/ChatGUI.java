@@ -75,6 +75,10 @@ public class ChatGUI {
         disconnectButton.setFont(font);
         disconnectButton.setBounds(25, 410, 130, 35);
 
+        final JButton join = new CustomButton("Join Back", new Color(78, 153, 245),Color.WHITE,20);
+        join.setFont(font);
+        join.setBounds(25, 410, 130, 35);
+
         JPanel buttons = new JPanel();
         buttons.setBounds(550,350,120,100);
         buttons.setLayout(new GridLayout(2,1,3,4));
@@ -109,11 +113,45 @@ public class ChatGUI {
             }
           });
 
-          disconnectButton.addActionListener(new ActionListener()  {
+          disconnectButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-              messageCallback.onDisconnect();
+                // Disable discussion field, users list, and text area
+                discussionField.setEnabled(false);
+                listUsers.setEnabled(false);
+                textArea.setEnabled(false);
+        
+                // Replace disconnect button with join back button
+                buttons.remove(disconnectButton);
+                buttons.add(join);
+        
+                // Repaint the panel to reflect changes
+                buttons.revalidate();
+                buttons.repaint();
+        
+                // Inform the callback about the disconnect
+                messageCallback.onDisconnect();
             }
-          });
+        });
+        
+        join.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                // Enable discussion field, users list, and text area
+                discussionField.setEnabled(true);
+                listUsers.setEnabled(true);
+                textArea.setEnabled(true);
+        
+                // Replace join back button with disconnect button
+                buttons.remove(join);
+                buttons.add(disconnectButton);
+        
+                // Repaint the panel to reflect changes
+                buttons.revalidate();
+                buttons.repaint();
+            }
+        });
+        
+
+
           Container board = mainFrame.getContentPane();
           board.add(discussionScroll, board);
           board.add(listScroll,board );

@@ -17,6 +17,7 @@ public class Client implements MessageCallback{
     BufferedWriter bufferedWriter;
     String username;
     private ChatGUI gui;
+
     
     Client(Socket socket, String username, ChatGUI gui){
         try {
@@ -38,7 +39,7 @@ public class Client implements MessageCallback{
 
     public void sendMessage(String messageToSend){
         try {
-            bufferedWriter.write("<b>"+username+"</b>" + ": " +messageToSend);
+            bufferedWriter.write(messageToSend);
             bufferedWriter.newLine();
             bufferedWriter.flush();
         } catch (Exception e) {
@@ -51,7 +52,7 @@ public class Client implements MessageCallback{
         // i think this part would be changed to impliment GUI
         if (joined){
             try {
-                bufferedWriter.write(  "SERVER:" + username+"JOINED");
+                bufferedWriter.write(  "SERVER:JOINED");
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
             } catch (Exception e) {
@@ -60,7 +61,7 @@ public class Client implements MessageCallback{
             }
         }else{
             try {
-                bufferedWriter.write(  "SERVER:"+username +"LEFT");
+                bufferedWriter.write(  "SERVER:LEFT");
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
             } catch (Exception e) {
@@ -76,17 +77,25 @@ public class Client implements MessageCallback{
             @Override
             public void run(){
                 String msgFromGroupChat;
-                
                 while (socket.isConnected()) {
                     try {
                         msgFromGroupChat = bufferedReader.readLine();
-                        gui.appendToPane(gui.discussionField,msgFromGroupChat);//every client waits for the msg sent form client handler and print it out on their consol
+                        gui.appendToPane(gui.discussionField, msgFromGroupChat);
+                        //every client waits for the msg sent form client handler and print it out on their consol
                     } catch (Exception e) {
                         closeEverthing(socket, bufferedReader, bufferedWriter);
                     }
                 }
             }
         }).start();
+    }
+
+    public void addToPane(String messString){
+        gui.appendToPane(gui.discussionField, messString);
+    }
+
+    public ChatGUI geChatGUI(){
+        return this.gui;
     }
 
     public void closeEverthing(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter){
@@ -118,6 +127,10 @@ public class Client implements MessageCallback{
     @Override
     public void onReconnect(){
         sendMessage(true);
+    }
+
+    public String getUsername() {
+        return this.username;
     }
 
     // public static void main(String[] args) {

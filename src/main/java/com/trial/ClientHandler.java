@@ -63,21 +63,26 @@ public class ClientHandler implements Runnable{
         ArrayList<Document> sortedMessages = (ArrayList<Document>) messageCollection.find().into(new ArrayList<>());
         Collections.sort(sortedMessages, Comparator.comparingLong(doc -> doc.getLong("timestamp"))); // 1 for ascending, -1 for descending
 
-        ChatGUI thisGui = mediatorImpl.getGUI(clientUsername);
         for (Document document : sortedMessages) {
               String msg = document.getString("message");
-              SwingUtilities.invokeLater(() -> {
-                thisGui.appendToPane(thisGui.discussionField, msg);
-            });
+              String sender = document.getString("sender");
+              try {
+                this.bufferedWriter.write("<b> "+sender+": </b>" + clientUsername );
+                this.bufferedWriter.newLine();
+                this.bufferedWriter.flush();
+            } catch (IOException e) {
+                System.out.println("error at retirving old messages, clienthandler");
+                e.getMessage();
+            }
           }
 
         while (socket.isConnected()) {
             try{
                 messageFromClient = bufferedReader.readLine();
-                if (messageFromClient.equals("SERVER:" + clientUsername + "JOINED")){
+                if (messageFromClient.equals("SERVER:JOINED")){
                     broadcastMessage("<b>SERVER: " + clientUsername + " has joined the chat.</b>");
                     mediatorImpl.addUser(clientUsername);
-                }else if(messageFromClient.equals("SERVER:" + clientUsername + "LEFT")){
+                }else if(messageFromClient.equals("SERVER:LEFT")){
                     broadcastMessage("<b>SERVER: " + clientUsername + " has left the chat.</b>");
                 }else{
                     //amha
@@ -86,7 +91,7 @@ public class ClientHandler implements Runnable{
                     .append("message", messageFromClient)
                     .append("timestamp", System.currentTimeMillis());
                         messageCollection.insertOne(document);
-                    broadcastMessage(messageFromClient);
+                    broadcastMessage("<b>" + clientUsername + ":</b> " + messageFromClient);
                 }
             } catch(IOException e){
                 closeEverthing(socket, bufferedReader, bufferedWriter);

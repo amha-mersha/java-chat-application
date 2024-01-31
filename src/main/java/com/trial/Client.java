@@ -37,9 +37,8 @@ public class Client implements MessageCallback{
     }
 
     public void sendMessage(String messageToSend){
-        // i think this part would be changed to impliment GUI
         try {
-            bufferedWriter.write(username + ": " +messageToSend);
+            bufferedWriter.write("<b>"+username+"</b>" + ": " +messageToSend);
             bufferedWriter.newLine();
             bufferedWriter.flush();
         } catch (Exception e) {
@@ -52,7 +51,7 @@ public class Client implements MessageCallback{
         // i think this part would be changed to impliment GUI
         if (joined){
             try {
-                bufferedWriter.write(  "<b> SERVER: </b>"+username +"<b> has rejoined the chat.");
+                bufferedWriter.write(  "SERVER:" + username+"JOINED");
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
             } catch (Exception e) {
@@ -61,7 +60,7 @@ public class Client implements MessageCallback{
             }
         }else{
             try {
-                bufferedWriter.write(  "<b> SERVER: </b>"+username +"<b> has left the chat.");
+                bufferedWriter.write(  "SERVER:"+username +"LEFT");
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
             } catch (Exception e) {
@@ -119,12 +118,5 @@ public class Client implements MessageCallback{
     @Override
     public void onReconnect(){
         sendMessage(true);
-    }
-
-
-    public static void main(String[] args) throws UnknownHostException, IOException {
-
-        Socket socket = new Socket("localhost", 4321);
-        Client client = new Client(socket, "username",new ChatGUI("Username"));
     }
 }

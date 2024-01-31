@@ -31,14 +31,11 @@ public class ChatGUI {
     private String oldMsg = "";
     private MessageCallback messageCallback;    
     private String usernameString;
-    private final ChatMediatorImpl mediator;
     
-    public ChatGUI(String usernameString,ChatMediatorImpl mediator){
+    public ChatGUI(String usernameString){
         String fontfamily = "Arial, sans-serif";
         Font font = new Font(fontfamily, Font.PLAIN, 15);
         this.usernameString = usernameString;
-        this.mediator = mediator;
-        mediator.addUser(usernameString);
 
         mainFrame = new JFrame("Chat");  
         mainFrame.getContentPane().setLayout(null);
@@ -126,7 +123,6 @@ public class ChatGUI {
           disconnectButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 messageCallback.onDisconnect();
-                mediator.removeChatGUI(ChatGUI.this);
                 // Disable discussion field, users list, and text area
                 discussionField.setEnabled(false);
                 listUsers.setEnabled(false);
@@ -151,7 +147,6 @@ public class ChatGUI {
         joinButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
               messageCallback.onReconnect();
-              mediator.addChatGUI(ChatGUI.this);
               // Enable discussion field, users list, and text area
               discussionField.setEnabled(true);
               listUsers.setEnabled(true);
@@ -219,32 +214,31 @@ public class ChatGUI {
         }
     }
 }
-
-
   
   public void setMessageCallback(MessageCallback callback){
     messageCallback = callback;
   }
-
-  void updateSharedUserList() {
+  void updateSharedUserList(ChatMediatorImpl mediatorImpl) {
     SwingUtilities.invokeLater(() -> {
         listUsers.setText("");
-        for (String user : mediator.getUserList()) {
+        for (String user : mediatorImpl.getUserList()) {
             appendToPane(listUsers, "@" + user);
         }
         listUsers.revalidate();
         listUsers.repaint();
+        mainFrame.revalidate();
+        mainFrame.repaint();
     });
 }
 
-private void removeUserFromSharedList(String username) {
-  SwingUtilities.invokeLater(() -> {
-      mediator.removeUser(username);
-      updateSharedUserList();
-  });
-}
+// private void removeUserFromSharedList(String username) {
+//   SwingUtilities.invokeLater(() -> {
+//       mediator.removeUser(username);
+//       updateSharedUserList();
+//   });
+// }
 
-  public static void main(String[] args) {
-    ChatGUI chatGUI = new ChatGUI("testcase", new ChatMediatorImpl());
-  }
+  // public static void main(String[] args) {
+  //   ChatGUI chatGUI = new ChatGUI("testcase", new ChatMediatorImpl());
+  // }
 }

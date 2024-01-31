@@ -1,13 +1,11 @@
 package com.trial;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChatMediatorImpl implements ChatMediator {
-    private final ArrayList<String> userList = new ArrayList<>();
-    private final ArrayList<ChatGUI> chatGUIs = new ArrayList<>();
-
-    ChatMediatorImpl(){
-    }
+    private final List<String> userList = new ArrayList<>();
+    private final List<ChatGUI> chatGUIs = new ArrayList<>();
 
     @Override
     public void addUser(String username) {
@@ -34,10 +32,10 @@ public class ChatMediatorImpl implements ChatMediator {
         chatGUIs.remove(chatGUI);
     }
 
-    private void notifyUserListUpdate() {
+    public void notifyUserListUpdate() {
         for (ChatGUI chatGUI : chatGUIs) {
-            chatGUI.updateSharedUserList();
+            chatGUI.updateSharedUserList(this);
         }
     }
-
 }
+    

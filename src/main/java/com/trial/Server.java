@@ -12,9 +12,11 @@ import com.mongodb.client.MongoClients;
 
 public class Server{
     private ServerSocket serverSocket;
+    private ChatMediatorImpl mediator;
     
     Server(ServerSocket serverSocket){
         this.serverSocket = serverSocket;
+        this.mediator = new ChatMediatorImpl() ;
     }
 
     public void startServer(){
@@ -22,7 +24,7 @@ public class Server{
             while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connected!");
-                ClientHandler clienthandler = new ClientHandler(socket);
+                ClientHandler clienthandler = new ClientHandler(socket,mediator);
 
                 Thread thread = new Thread(clienthandler);
                 thread.start();
@@ -43,7 +45,7 @@ public class Server{
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(4321);
         Server server = new Server(serverSocket);
-        System.out.println("Port 1234 is now open.");
+        System.out.println("Port 4321 is now open.");
 
         server.startServer();
     }

@@ -27,7 +27,6 @@ public class SignIn extends JFrame {
     private Socket signSocket;
     private BufferedReader reader;
     private BufferedWriter writer;
-    static ChatMediatorImpl mediatorImpl = new ChatMediatorImpl();
 
 
     public SignIn(Socket signinSocket) {
@@ -94,8 +93,7 @@ public class SignIn extends JFrame {
                     // Handle different responses
                     if ("SUCCESS".equals(response)) {
                         // Successful login, perform actions here
-                        ChatGUI gui = new ChatGUI(enteredUsername,mediatorImpl);
-                        mediatorImpl.addChatGUI(gui);
+                        ChatGUI gui = new ChatGUI(enteredUsername);
                         Client client = new Client(new Socket("127.0.0.1", 4321), enteredUsername, gui);
                         client.listenForMessage();
                         JOptionPane.showMessageDialog(SignIn.this, "Login Successful");

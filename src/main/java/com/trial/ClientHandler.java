@@ -8,6 +8,8 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import javax.swing.SwingUtilities;
+
 import org.bson.Document;
 
 import com.mongodb.client.MongoCollection;
@@ -27,14 +29,18 @@ public class ClientHandler implements Runnable{
     private MongoClient mongoClient;
     private MongoDatabase database;
     private MongoCollection messageCollection;
+    private ChatMediatorImpl mediatorImpl;
 
-    ClientHandler(Socket socket){
+    ClientHandler(Socket socket, ChatMediatorImpl mediatorImpl){
         try{
             this.mongoClient = MongoClients.create("mongodb://localhost:27017");
             this.database = mongoClient.getDatabase("chatdb");
             this.messageCollection = database.getCollection("messages");
 
             this.socket = socket;
+            this.mediatorImpl = mediatorImpl;
+            mediatorImpl.addUser(clientUsername);
+            mediatorImpl.notifyUserListUpdate();
             //socket.getInputStream gives us a byte stream so we wrapp it with InputStreamReader to character stream, the same with the output stream
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -55,13 +61,20 @@ public class ClientHandler implements Runnable{
         while (socket.isConnected()) {
             try{
                 messageFromClient = bufferedReader.readLine();
-                //amha
-                // Store the message in MongoDB
-                Document document = new Document("sender",this.clientUsername)
-                                        .append("message", messageFromClient)
-                                        .append("timestamp", System.currentTimeMillis());
-                messageCollection.insertOne(document);
-                broadcastMessage(messageFromClient);
+                if (messageFromClient.equals("SERVER:" + clientUsername + "JOINED")){
+                    broadcastMessage("<b>SERVER: " + clientUsername + " has joined the chat.</b>");
+                    mediatorImpl.addUser(clientUsername);
+                }else if(messageFromClient.equals("SERVER:" + clientUsername + "LEFT")){
+                    broadcastMessage("<b>SERVER: " + clientUsername + " has left the chat.</b>");
+                }else{
+                    //amha
+                    // Store the message in MongoDB
+                    Document document = new Document("sender",this.clientUsername)
+                    .append("message", messageFromClient)
+                    .append("timestamp", System.currentTimeMillis());
+                        messageCollection.insertOne(document);
+                    broadcastMessage(messageFromClient);
+                }
             } catch(IOException e){
                 closeEverthing(socket, bufferedReader, bufferedWriter);
                 break;
@@ -78,6 +91,7 @@ public class ClientHandler implements Runnable{
                     clientHandler.bufferedWriter.flush(); // to small to fill the buffer so we flush it
                 }
             }catch(IOException e){
+                System.out.println("error at broadcastMessage");
                 closeEverthing(socket, bufferedReader, bufferedWriter);
             }
         }
@@ -101,7 +115,9 @@ public class ClientHandler implements Runnable{
                 bufferedWriter.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("error at close everything, clienthandler");
+            e.getMessage();
         }
     }
+
 }

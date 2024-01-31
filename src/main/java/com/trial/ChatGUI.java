@@ -20,6 +20,10 @@ public class ChatGUI {
     final JTextPane discussionField = new JTextPane();
     final JTextPane listUsers = new JTextPane();
     final JTextField textArea = new JTextField();
+    private JPanel buttons = new JPanel();
+    final JButton joinButton;
+    final JButton sendButton;
+    final JButton disconnectButton;
     private String oldMsg = "";
     private MessageCallback messageCallback;    
     private String usernameString;
@@ -66,20 +70,19 @@ public class ChatGUI {
         textScroll.setBounds(25, 350, 510, 50);
 
         // button send
-        final JButton sendButton = new CustomButton("Send", new Color(78, 153, 245),Color.WHITE,20);
+        sendButton = new CustomButton("Send", new Color(78, 153, 245),Color.WHITE,20);
         sendButton.setFont(font);
         sendButton.setBounds(575, 410, 100, 35);
 
         // button Disconnect
-        final JButton disconnectButton = new CustomButton("Disconnect", new Color(78, 153, 245),Color.WHITE,20);
+        disconnectButton = new CustomButton("Disconnect", new Color(78, 153, 245),Color.WHITE,20);
         disconnectButton.setFont(font);
         disconnectButton.setBounds(25, 410, 130, 35);
 
-        final JButton join = new CustomButton("Join Back", new Color(78, 153, 245),Color.WHITE,20);
-        join.setFont(font);
-        join.setBounds(25, 410, 130, 35);
+        joinButton = new CustomButton("Join Back", new Color(78, 153, 245),Color.WHITE,20);
+        joinButton.setFont(font);
+        joinButton.setBounds(25, 410, 130, 35);
 
-        JPanel buttons = new JPanel();
         buttons.setBounds(550,350,120,100);
         buttons.setLayout(new GridLayout(2,1,3,4));
         buttons.add(sendButton);
@@ -122,7 +125,7 @@ public class ChatGUI {
         
                 // Replace disconnect button with join back button
                 buttons.remove(disconnectButton);
-                buttons.add(join);
+                buttons.add(joinButton);
         
                 // Repaint the panel to reflect changes
                 buttons.revalidate();
@@ -133,23 +136,11 @@ public class ChatGUI {
             }
         });
         
-        join.addActionListener(new ActionListener() {
+        joinButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                // Enable discussion field, users list, and text area
-                discussionField.setEnabled(true);
-                listUsers.setEnabled(true);
-                textArea.setEnabled(true);
-        
-                // Replace join back button with disconnect button
-                buttons.remove(join);
-                buttons.add(disconnectButton);
-        
-                // Repaint the panel to reflect changes
-                buttons.revalidate();
-                buttons.repaint();
+                messageCallback.onReconnect();
             }
-        });
-        
+        });        
 
 
           Container board = mainFrame.getContentPane();
@@ -181,9 +172,25 @@ public class ChatGUI {
       editorKit.insertHTML(doc, doc.getLength(), msg, 0, 0, null);
       tp.setCaretPosition(doc.getLength());
     } catch(Exception e){
+      System.out.println("error at appendToPane");
       e.printStackTrace();
     }
     
+  }
+
+  public void reconnect(){
+    // Enable discussion field, users list, and text area
+    discussionField.setEnabled(true);
+    listUsers.setEnabled(true);
+    textArea.setEnabled(true);
+
+    // Replace join back button with disconnect button
+    buttons.remove(this.joinButton);
+    buttons.add(disconnectButton);
+
+    // Repaint the panel to reflect changes
+    buttons.revalidate();
+    buttons.repaint();
   }
   
   public void setMessageCallback(MessageCallback callback){

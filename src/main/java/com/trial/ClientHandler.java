@@ -42,6 +42,7 @@ public class ClientHandler implements Runnable{
             clientHandlers.add(this);
             broadcastMessage("SERVER: " +this.clientUsername+ " has entered the chat!");
         }catch (IOException e){
+            System.out.println("error at ClientHandler constructor");
             closeEverthing(socket, bufferedReader, bufferedWriter);
         }
     }

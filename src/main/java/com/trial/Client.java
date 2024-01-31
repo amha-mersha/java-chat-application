@@ -42,7 +42,7 @@ public class Client implements MessageCallback{
             bufferedWriter.newLine();
             bufferedWriter.flush();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage());
+            JOptionPane.showMessageDialog(null,"error at sendMessage, client " + e.getMessage());
             closeEverthing(socket, bufferedReader, bufferedWriter);
         }
     }
@@ -90,12 +90,28 @@ public class Client implements MessageCallback{
     @Override
     public void onDisconnect() {
         // The callback from the GUI for disconnection
-        disconnect();
-    }
-
-    private void disconnect() {
         closeEverthing(socket, bufferedReader, bufferedWriter);
     }
+
+    @Override
+    public void onReconnect(){
+        try {
+            this.socket = new Socket("0.0.0.0", 4321); // Replace with your server details
+            this.username = username;
+            this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            bufferedWriter.write(username);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+
+            // Inform the GUI about the reconnection
+            gui.reconnect();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "error at onReconnet " + e.getMessage());
+            closeEverthing(socket, bufferedReader, bufferedWriter);
+        }
+    }
+
 
     // public static void main(String[] args) throws UnknownHostException, IOException {
 

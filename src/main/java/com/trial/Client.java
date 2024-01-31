@@ -90,14 +90,21 @@ public class Client implements MessageCallback{
     @Override
     public void onDisconnect() {
         // The callback from the GUI for disconnection
-        closeEverthing(socket, bufferedReader, bufferedWriter);
+        try{
+            if (bufferedReader != null){
+                bufferedReader.close();
+            }
+            if (bufferedWriter != null){
+                bufferedWriter.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onReconnect(){
         try {
-            this.socket = new Socket("0.0.0.0", 4321); // Replace with your server details
-            this.username = username;
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             bufferedWriter.write(username);
